@@ -5,8 +5,8 @@ CLI tool for redash
 # Installation
 
 ```
-go install github.com/go-yushi-nakai/redac/cli/redac
-go install github.com/go-yushi-nakai/redac/cli/redac-util
+go install github.com/go-yushi-nakai/redac/cli/redac@latest
+go install github.com/go-yushi-nakai/redac/cli/redac-util@latest
 ```
 
 
