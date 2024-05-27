@@ -121,30 +121,40 @@ func (rc *RedashClient) QueryAndWaitResult(ctx context.Context, req RedashPostQu
 	if err != nil {
 		return nil, err
 	}
+	jobID := job.Job.ID
 
-	for i := 0; i < 5; i++ {
+	for {
 		time.Sleep(time.Second)
-		if job.Job.ID == "" {
-			continue
+		job, err = rc.GetJob(ctx, jobID)
+
+		select {
+		case <-ctx.Done():
+			rc.cleanupJob(jobID)
+		default:
 		}
-		job, err = rc.GetJob(ctx, job.Job.ID)
+
 		if err != nil {
 			return nil, err
 		}
+
 		if job.Job.Status == RedashJobStatusSuccess {
 			break
 		}
+
 		if job.Job.Status == RedashJobStatusFailure {
 			return nil, fmt.Errorf("job is failed: %s", job.Job.Error)
 		}
-		select {
-		case <-ctx.Done():
-			if err := rc.DeleteJob(ctx, job.Job.ID); err != nil {
-				return nil, fmt.Errorf("failed to delete job: %w", err)
-			}
-		}
 	}
 	return rc.GetQueryResult(ctx, job.Job.QueryResultID)
+}
+
+func (rc *RedashClient) cleanupJob(jobID string) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if err := rc.DeleteJob(ctx, jobID); err != nil {
+		rc.Logger.Error("failed to delete job", "job_id", jobID, "err", err)
+	}
+	rc.Logger.Warn("job is cancelled", "job_id", jobID)
 }
 
 func (rc *RedashClient) PostQueryResults(ctx context.Context, req RedashPostQueryResultRequest) (*RedashGetJobResponse, error) {
