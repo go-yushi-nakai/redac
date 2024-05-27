@@ -116,7 +116,7 @@ var delCmd = &cobra.Command{
 			if err := redac.DeleteConfigContext(target); err != nil {
 				fmt.Printf("failed to delete context: %s\n", err)
 			}
-			fmt.Printf("context name=%s dleeted\n", target)
+			fmt.Printf("context name=%s deleted\n", target)
 		}
 		return
 	},
