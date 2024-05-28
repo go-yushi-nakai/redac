@@ -48,7 +48,7 @@ $ ./redac test.sql <context name>
 ## Execute query from argument
 
 ```
-$ redac -e 'select "OK" as "This is Test"' <context name>
+$ redac -e "select 'OK' as \"This is Test\"" <context name>
   THIS IS TEST
 ----------------
   OK
