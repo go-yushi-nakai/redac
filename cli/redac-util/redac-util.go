@@ -20,6 +20,8 @@ func init() {
 	configCmd.AddCommand(addCmd)
 	configCmd.AddCommand(delCmd)
 	rootCmd.AddCommand(showUsersCmd)
+	rootCmd.AddCommand(showDashboardsCmd)
+	rootCmd.AddCommand(showQueriesCmd)
 }
 
 var rootCmd = &cobra.Command{
@@ -134,7 +136,7 @@ func main() {
 var showUsersCmd = &cobra.Command{
 	Use: "show-users",
 	Run: func(cmd *cobra.Command, args []string) {
-		logger, err := redac.NewLogger("debug") // FIXME: debug -> info
+		logger, err := redac.NewLogger("info")
 		if err != nil {
 			fmt.Printf("failed to create logger: %s\n", err)
 			return
@@ -148,7 +150,6 @@ var showUsersCmd = &cobra.Command{
 
 		contextName := args[0]
 		cc := c.Contexts[contextName]
-
 		rc, err := redac.NewRedashClient(cc.Endpoint, cc.APIKey, logger)
 		if err != nil {
 			fmt.Printf("failed to create redash client: %s\n", err)
@@ -156,7 +157,6 @@ var showUsersCmd = &cobra.Command{
 		}
 
 		searchWord := prompter.Prompt("search word", "")
-
 		users, err := rc.GetUsers(context.Background(), searchWord)
 		if err != nil {
 			fmt.Printf("failed to get users: %s\n", err)
@@ -170,6 +170,85 @@ var showUsersCmd = &cobra.Command{
 		}
 
 		fmt.Println(string(jsonData))
+	},
+}
 
+var showDashboardsCmd = &cobra.Command{
+	Use: "show-dashboards",
+	Run: func(cmd *cobra.Command, args []string) {
+		logger, err := redac.NewLogger("info")
+		if err != nil {
+			fmt.Printf("failed to create logger: %s\n", err)
+			return
+		}
+
+		c, err := redac.LoadConfig()
+		if err != nil {
+			fmt.Printf("failed to load config: %s\n", err)
+			return
+		}
+
+		contextName := args[0]
+		cc := c.Contexts[contextName]
+		rc, err := redac.NewRedashClient(cc.Endpoint, cc.APIKey, logger)
+		if err != nil {
+			fmt.Printf("failed to create redash client: %s\n", err)
+			return
+		}
+
+		searchWord := prompter.Prompt("search word", "")
+		dashboards, err := rc.GetDashboards(context.Background(), searchWord)
+		if err != nil {
+			fmt.Printf("failed to get dashboards: %s\n", err)
+			return
+		}
+
+		jsonData, err := json.MarshalIndent(dashboards, "", "    ")
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		fmt.Println(string(jsonData))
+	},
+}
+
+var showQueriesCmd = &cobra.Command{
+	Use: "show-queries",
+	Run: func(cmd *cobra.Command, args []string) {
+		logger, err := redac.NewLogger("info")
+		if err != nil {
+			fmt.Printf("failed to create logger: %s\n", err)
+			return
+		}
+
+		c, err := redac.LoadConfig()
+		if err != nil {
+			fmt.Printf("failed to load config: %s\n", err)
+			return
+		}
+
+		contextName := args[0]
+		cc := c.Contexts[contextName]
+		rc, err := redac.NewRedashClient(cc.Endpoint, cc.APIKey, logger)
+		if err != nil {
+			fmt.Printf("failed to create redash client: %s\n", err)
+			return
+		}
+
+		searchWord := prompter.Prompt("search word", "")
+		queries, err := rc.GetQueries(context.Background(), searchWord)
+		if err != nil {
+			fmt.Printf("failed to get queries: %s\n", err)
+			return
+		}
+
+		jsonData, err := json.MarshalIndent(queries, "", "    ")
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		fmt.Println(string(jsonData))
 	},
 }

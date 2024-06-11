@@ -63,6 +63,22 @@ type RedashGetUsersResponse struct {
 	}
 }
 
+type RedashGetDashboardsResponse struct {
+	Count   int `json:"count"`
+	Results []struct {
+		ID   int    `json:"id"`
+		Name string `json:"name"`
+	}
+}
+
+type RedashGetQueriesResponse struct {
+	Count   int `json:"count"`
+	Results []struct {
+		ID   int    `json:"id"`
+		Name string `json:"name"`
+	}
+}
+
 func (r *RedashGetQueryResultResponse) GetTable() [][]string {
 	data := r.QueryResult.Data
 
@@ -134,6 +150,38 @@ func (rc *RedashClient) GetUsers(ctx context.Context, word string) (*RedashGetUs
 		return nil, fmt.Errorf("failed to get users, status=%d", resp.StatusCode)
 	}
 	var data RedashGetUsersResponse
+	if err := rc.unmarshalResponse(resp, &data); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal response. %w", err)
+	}
+	return &data, nil
+}
+
+func (rc *RedashClient) GetDashboards(ctx context.Context, word string) (*RedashGetDashboardsResponse, error) {
+	api := fmt.Sprintf("dashboards?q=%s", word)
+	resp, err := rc.doRequest(ctx, http.MethodGet, api, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get dashboards. %w", err)
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("failed to get dashboards, status=%d", resp.StatusCode)
+	}
+	var data RedashGetDashboardsResponse
+	if err := rc.unmarshalResponse(resp, &data); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal response. %w", err)
+	}
+	return &data, nil
+}
+
+func (rc *RedashClient) GetQueries(ctx context.Context, word string) (*RedashGetQueriesResponse, error) {
+	api := fmt.Sprintf("queries?q=%s", word)
+	resp, err := rc.doRequest(ctx, http.MethodGet, api, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get queries. %w", err)
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("failed to get queries, status=%d", resp.StatusCode)
+	}
+	var data RedashGetQueriesResponse
 	if err := rc.unmarshalResponse(resp, &data); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal response. %w", err)
 	}
