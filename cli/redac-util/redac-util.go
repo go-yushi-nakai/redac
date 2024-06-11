@@ -51,7 +51,6 @@ var listCmd = &cobra.Command{
 		for _, configCtx := range c.Contexts {
 			fmt.Printf("%s: endpoint=%s, data_source_id=%d\n", configCtx.Name, configCtx.Endpoint, configCtx.DataSourceID)
 		}
-		return
 	},
 }
 
@@ -102,7 +101,6 @@ var addCmd = &cobra.Command{
 			fmt.Printf("failed to add context: %s\n", err)
 			return
 		}
-		return
 	},
 }
 
@@ -120,7 +118,6 @@ var delCmd = &cobra.Command{
 			}
 			fmt.Printf("context name=%s deleted\n", target)
 		}
-		return
 	},
 }
 
