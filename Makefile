@@ -4,18 +4,15 @@ REVISION := $(shell git rev-parse --short HEAD)
 LDFLAGS := -X 'github.com/go-yushi-nakai/redac.version=$(VERSION)' \
            -X 'github.com/go-yushi-nakai/redac.revision=$(REVISION)'
 
-all: redac redac-acl redac-util
+all: redac redac-util
 
 redac: $(GO_FILES)
 	go build -ldflags "$(LDFLAGS)" -o redac ./cli/redac
-
-redac-acl: $(GO_FILES)
-	go build -ldflags "$(LDFLAGS)" -o redac-acl ./cli/redac-acl
 
 redac-util: $(GO_FILES)
 	go build -ldflags "$(LDFLAGS)" -o redac-util ./cli/redac-util
 
 clean:
-	rm -rf redac redac-acl redac-util
+	rm -rf redac redac-util
 
 .PHONY: clean

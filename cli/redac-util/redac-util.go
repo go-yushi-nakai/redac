@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"strconv"
@@ -18,6 +19,7 @@ func init() {
 	configCmd.AddCommand(listCmd)
 	configCmd.AddCommand(addCmd)
 	configCmd.AddCommand(delCmd)
+	rootCmd.AddCommand(showUsersCmd)
 }
 
 var rootCmd = &cobra.Command{
@@ -131,4 +133,47 @@ func Execute() {
 
 func main() {
 	Execute()
+}
+
+var showUsersCmd = &cobra.Command{
+	Use: "show-users",
+	Run: func(cmd *cobra.Command, args []string) {
+		logger, err := redac.NewLogger("debug") // FIXME: debug -> info
+		if err != nil {
+			fmt.Printf("failed to create logger: %s\n", err)
+			return
+		}
+
+		c, err := redac.LoadConfig()
+		if err != nil {
+			fmt.Printf("failed to load config: %s\n", err)
+			return
+		}
+
+		contextName := args[0]
+		cc := c.Contexts[contextName]
+
+		rc, err := redac.NewRedashClient(cc.Endpoint, cc.APIKey, logger)
+		if err != nil {
+			fmt.Printf("failed to create redash client: %s\n", err)
+			return
+		}
+
+		searchWord := prompter.Prompt("search word", "")
+
+		users, err := rc.GetUsers(context.Background(), searchWord)
+		if err != nil {
+			fmt.Printf("failed to get users: %s\n", err)
+			return
+		}
+
+		jsonData, err := json.MarshalIndent(users, "", "    ")
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		fmt.Println(string(jsonData))
+
+	},
 }
