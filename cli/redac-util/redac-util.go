@@ -42,7 +42,6 @@ var configCmd = &cobra.Command{
 var listCmd = &cobra.Command{
 	Use: "list",
 	Run: func(cmd *cobra.Command, args []string) {
-		redac.LoadConfig()
 		c, err := redac.LoadConfig()
 		if err != nil {
 			fmt.Printf("failed to load config: %s\n", err)
